@@ -1,0 +1,31 @@
+# GitLab CI jobs for processing controller
+
+.env: &env
+  variables:
+    BUILD_PATH: src/processing_controller
+
+# ============================================================================
+# Test Python package
+# ============================================================================
+
+test:processing_controller:
+  extends: .test_python
+  <<: *env
+
+# ============================================================================
+# Build Docker development image
+# ============================================================================
+
+build:processing_controller:
+  extends: .build_docker
+  <<: *env
+
+# ============================================================================
+# Tag and publish Docker image (master only)
+# ============================================================================
+
+publish:processing_controller:
+  extends: .publish_docker
+  dependencies:
+    - build:processing_controller
+  <<: *env
