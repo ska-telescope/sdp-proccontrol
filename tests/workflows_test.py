@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 
 from ska.logging import configure_logging
-from processing_controller import processing_controller
+from ska_sdp_proccontrol import processing_controller
 
 configure_logging()
 LOG = logging.getLogger(__name__)

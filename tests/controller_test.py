@@ -2,7 +2,7 @@ import os
 import logging
 
 from ska.logging import configure_logging
-from processing_controller import processing_controller
+from ska_sdp_proccontrol import processing_controller
 
 import ska_sdp_config
 import workflows_test

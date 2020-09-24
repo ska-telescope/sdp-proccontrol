@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""PIP setup script for the SDP Logging package."""
+"""PIP setup script for the SDP Processing Controller package."""
 
 import setuptools
 
@@ -10,15 +10,19 @@ with open("README.md", "r") as fh:
     LONG_DESCRIPTION = fh.read()
 
 setuptools.setup(
-    name='processing_controller',
+    name='ska-sdp-proccontrol',
     version=VERSION,
     description='SDP service responsible for the controlling the execution of processing blocks',
     author='SKA Sim Team',
     license='License :: OSI Approved :: BSD License',
     long_description=LONG_DESCRIPTION,
     long_description_content_type='text/markdown',
-    url='https://gitlab.com/ska-telescope/sdp-prototype/src/processing_controller/',
-    packages=setuptools.find_packages(),
+    url='https://gitlab.com/ska-telescope/sdp-proccontrol/',
+    package_dir={'': 'src'},
+    packages=setuptools.find_packages('src'),
+    package_data={
+        'ska_sdp_proccontrol': ['schema/*.json']
+    },
     install_requires=[
         'jsonschema',
         'requests',
