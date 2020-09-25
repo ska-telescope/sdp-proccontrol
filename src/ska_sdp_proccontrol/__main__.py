@@ -10,7 +10,7 @@ from . import ProcessingController
 
 LOG_LEVEL = os.getenv('SDP_LOG_LEVEL', 'DEBUG')
 WORKFLOWS_URL = os.getenv('SDP_WORKFLOWS_URL',
-                          'https://gitlab.com/ska-telescope/sdp-prototype/-/raw/master/src/workflows/workflows.json')
+                          'https://gitlab.com/ska-telescope/sdp-workflows-procfunc/-/raw/master/workflows.json')
 WORKFLOWS_REFRESH = int(os.getenv('SDP_WORKFLOWS_REFRESH', '300'))
 
 WORKFLOWS_SCHEMA = os.path.join(os.path.dirname(__file__), 'schema',
