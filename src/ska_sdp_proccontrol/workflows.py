@@ -2,8 +2,9 @@
 Class to handle workflow definitions.
 """
 
-import json
 import logging
+
+import json
 import requests
 import jsonschema
 

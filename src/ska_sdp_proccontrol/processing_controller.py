@@ -1,13 +1,23 @@
+import logging
 import os
 import re
+import signal
+import sys
 import time
-import logging
 
 import ska_sdp_config
 from ska.logging import configure_logging
 from ska_sdp_proccontrol.workflows import Workflows
 
-configure_logging()
+LOG_LEVEL = os.getenv('SDP_LOG_LEVEL', 'DEBUG')
+WORKFLOWS_URL = os.getenv('SDP_WORKFLOWS_URL',
+                          'https://gitlab.com/ska-telescope/sdp-workflows-procfunc/-/raw/master/workflows.json')
+WORKFLOWS_REFRESH = int(os.getenv('SDP_WORKFLOWS_REFRESH', '300'))
+
+WORKFLOWS_SCHEMA = os.path.join(os.path.dirname(__file__), 'schema',
+                                'workflows.json')
+
+configure_logging(level=LOG_LEVEL)
 LOG = logging.getLogger(__name__)
 
 # Regular expression to match processing block ID as substring
@@ -164,7 +174,7 @@ class ProcessingController:
                     deploy = txn.get_deployment(deploy_id)
                     txn.delete_deployment(deploy)
 
-    def main(self, backend=None):
+    def main_loop(self, backend=None):
         """
         Main loop
         :param backend: config backend to use.
@@ -194,3 +204,28 @@ class ProcessingController:
 
             LOG.debug('Waiting...')
             txn.loop(wait=True, timeout=next_workflows_refresh - time.time())
+
+
+def terminate(signal, frame):
+    """Terminate the program."""
+    LOG.info("Asked to terminate")
+    # Note that this will likely send SIGKILL to child processes -
+    # not exactly how this is supposed to work. But all of this is
+    # temporary anyway.
+    sys.exit(0)
+
+
+def main(backend=None):
+    # Register SIGTERM handler
+    signal.signal(signal.SIGTERM, terminate)
+
+    # Initialise processing controller
+    pc = ProcessingController(WORKFLOWS_SCHEMA, WORKFLOWS_URL, WORKFLOWS_REFRESH)
+
+    # Enter main loop
+    pc.main_loop()
+
+
+# Replaced __main__.py with this construct to simplify testing.
+if __name__ == '__main__':
+    main()

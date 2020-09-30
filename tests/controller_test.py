@@ -1,5 +1,6 @@
 import os
 import logging
+from unittest.mock import patch
 
 from ska_sdp_proccontrol import processing_controller
 
@@ -36,10 +37,17 @@ def test_stuff():
         assert controller._get_pb_status(txn, "test") is None
         txn.create_processing_block(pb)
 
-    controller.main()
+    controller.main_loop()
 
     for txn in config.txn():
         deployment_ids = txn.list_deployments()
 
     LOG.info(deployment_ids)
     assert 'proc-test-workflow' in deployment_ids
+
+
+@patch('signal.signal')
+@patch('sys.exit')
+def test_main(mock_exit, mock_signal):
+    processing_controller.main(backend='memory')
+    processing_controller.terminate(None, None)
