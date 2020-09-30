@@ -4,8 +4,10 @@ import time
 import logging
 
 import ska_sdp_config
-from .workflows import Workflows
+from ska.logging import configure_logging
+from ska_sdp_proccontrol.workflows import Workflows
 
+configure_logging()
 LOG = logging.getLogger(__name__)
 
 # Regular expression to match processing block ID as substring

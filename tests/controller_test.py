@@ -1,13 +1,11 @@
 import os
 import logging
 
-from ska.logging import configure_logging
 from ska_sdp_proccontrol import processing_controller
 
 import ska_sdp_config
 import workflows_test
 
-configure_logging()
 LOG = logging.getLogger(__name__)
 
 os.environ['SDP_CONFIG_BACKEND'] = 'memory'
@@ -35,6 +33,7 @@ def test_stuff():
     config = ska_sdp_config.Config()
 
     for txn in config.txn():
+        assert controller._get_pb_status(txn, "test") is None
         txn.create_processing_block(pb)
 
     controller.main()
