@@ -223,7 +223,7 @@ def main(backend=None):
     pc = ProcessingController(WORKFLOWS_SCHEMA, WORKFLOWS_URL, WORKFLOWS_REFRESH)
 
     # Enter main loop
-    pc.main_loop()
+    pc.main_loop(backend=backend)
 
 
 # Replaced __main__.py with this construct to simplify testing.
