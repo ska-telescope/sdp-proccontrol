@@ -21,6 +21,7 @@ def test_with_nonexistent_file():
 def test_with_non_json():
     wf = processing_controller.Workflows(PC_DIR / 'workflows.py')
     assert wf.version == {}
+    wf._update('xxx')
 
 
 def test_with_bad_json():
@@ -30,6 +31,13 @@ def test_with_bad_json():
 
 def test_before_update():
     wf = processing_controller.Workflows(SCHEMA)
+    assert wf.version == {}
+
+    # Now force schema validation error.
+    with open(WORKFLOWS, 'r') as file:
+        workflows_str = file.read()
+    workflows_str = workflows_str.replace("about", "abaht")
+    wf._update(workflows_str)
     assert wf.version == {}
 
 
