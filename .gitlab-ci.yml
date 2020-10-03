@@ -7,12 +7,34 @@ workflow:
     - if: $CI_COMMIT_BRANCH
 
 stages:
+  - init
   - test
   - lint
   - build
   - publish
 
 image: python:latest
+
+# Script segment to fetch artifacts from sdp-config if downstream and on branch
+
+
+fetch_artifacts:
+  stage: init
+  script:
+     - apt add curl
+     - mkdir dist
+        - >
+          if [ $UPSTREAM_BRANCH_NAME ]; then
+             echo "We are downstream"
+             curl --location --output artifacts.zip --header "JOB-TOKEN: $CI_JOB_TOKEN" "https://gitlab.com/api/v4/projects/21141282/jobs/artifacts/$UPSTREAM_BRANCH_NAME/download?job=build_dev"
+             unzip artifacts.zip
+          else
+             echo "We are standalone"
+          fi
+   artifacts:
+      paths:
+        - dist
+      expire_in: 1 hour   
 
 # ============================================================================
 # Test and lint Python package
@@ -21,7 +43,7 @@ image: python:latest
 test:
   stage: test
   before_script:
-    - pip3 install -r requirements.txt -r requirements-test.txt
+    - pip3 install -r requirements.txt -r requirements-test.txt -f dist
   script:
     - python3 setup.py test
   after_script:
@@ -38,7 +60,7 @@ lint:
   dependencies:
     - test
   before_script:
-    - pip3 install -r requirements.txt -r requirements-test.txt
+    - pip3 install -r requirements.txt -r requirements-test.txt -f .
   script:
     - pylint --exit-zero --output-format=parseable src/ska_sdp_proccontrol
     - pylint --exit-zero --output-format=pylint2junit.JunitReporter src/ska_sdp_proccontrol > linting.xml
