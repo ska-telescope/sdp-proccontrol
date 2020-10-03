@@ -21,7 +21,7 @@ image: python:latest
 fetch_artifacts:
   stage: init
   script:
-     - apk add curl
+     - apt install curl
      - mkdir dist
      - >
        if [ $UPSTREAM_BRANCH_NAME ]; then
