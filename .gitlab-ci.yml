@@ -23,18 +23,18 @@ fetch_artifacts:
   script:
      - apt add curl
      - mkdir dist
-        - >
-          if [ $UPSTREAM_BRANCH_NAME ]; then
-             echo "We are downstream"
-             curl --location --output artifacts.zip --header "JOB-TOKEN: $CI_JOB_TOKEN" "https://gitlab.com/api/v4/projects/21141282/jobs/artifacts/$UPSTREAM_BRANCH_NAME/download?job=build_dev"
-             unzip artifacts.zip
-          else
-             echo "We are standalone"
-          fi
-   artifacts:
-      paths:
-        - dist
-      expire_in: 1 hour   
+     - >
+       if [ $UPSTREAM_BRANCH_NAME ]; then
+          echo "We are downstream"
+          curl --location --output artifacts.zip --header "JOB-TOKEN: $CI_JOB_TOKEN" "https://gitlab.com/api/v4/projects/21141282/jobs/artifacts/$UPSTREAM_BRANCH_NAME/download job=build_dev"
+          unzip artifacts.zip
+       else
+          echo "We are standalone"
+       fi
+  artifacts:
+     paths:
+       - dist
+     expire_in: 1 hour   
 
 # ============================================================================
 # Test and lint Python package
