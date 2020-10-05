@@ -1,7 +1,6 @@
 import logging
 from pathlib import Path
 from unittest.mock import patch
-import requests
 
 from ska_sdp_proccontrol import processing_controller
 

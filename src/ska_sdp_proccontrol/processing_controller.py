@@ -17,7 +17,6 @@ WORKFLOWS_REFRESH = int(os.getenv('SDP_WORKFLOWS_REFRESH', '300'))
 WORKFLOWS_SCHEMA = os.path.join(os.path.dirname(__file__), 'schema',
                                 'workflows.json')
 
-configure_logging(level=LOG_LEVEL)
 LOG = logging.getLogger(__name__)
 
 # Regular expression to match processing block ID as substring
@@ -216,6 +215,8 @@ def terminate(signal, frame):
 
 
 def main(backend=None):
+    configure_logging(level=LOG_LEVEL)
+
     # Register SIGTERM handler
     signal.signal(signal.SIGTERM, terminate)
 
