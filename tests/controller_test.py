@@ -1,13 +1,12 @@
 import os
 import logging
+from unittest.mock import patch
 
-from ska.logging import configure_logging
 from ska_sdp_proccontrol import processing_controller
 
 import ska_sdp_config
 import workflows_test
 
-configure_logging()
 LOG = logging.getLogger(__name__)
 
 os.environ['SDP_CONFIG_BACKEND'] = 'memory'
@@ -35,12 +34,20 @@ def test_stuff():
     config = ska_sdp_config.Config()
 
     for txn in config.txn():
+        assert controller._get_pb_status(txn, "test") is None
         txn.create_processing_block(pb)
 
-    controller.main()
+    controller.main_loop()
 
     for txn in config.txn():
         deployment_ids = txn.list_deployments()
 
     LOG.info(deployment_ids)
     assert 'proc-test-workflow' in deployment_ids
+
+
+@patch('signal.signal')
+@patch('sys.exit')
+def test_main(mock_exit, mock_signal):
+    processing_controller.main(backend='memory')
+    processing_controller.terminate(None, None)
