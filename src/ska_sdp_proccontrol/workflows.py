@@ -12,13 +12,14 @@ LOG = logging.getLogger(__name__)
 
 
 class Workflows:
-    """Processing controller workflow definitions."""
+    """
+    Processing controller workflow definitions.
+
+    :param schema_file: name of schema file
+    """
 
     def __init__(self, schema_file):
-        """Initialise empty workflow list with schema.
-
-        :param schema_file: name of schema file
-        """
+        """Initialise empty workflow list with schema."""
         self._schema = self._read_schema(schema_file)
         self._version = {}
         self._realtime = {}
@@ -26,9 +27,11 @@ class Workflows:
 
     @staticmethod
     def _read_schema(schema_file):
-        """Read workflow definition schema.
+        """
+        Read workflow definition schema.
 
         :param schema_file: name of schema file.
+
         """
         LOG.info('Using schema file: %s', schema_file)
         try:
@@ -49,11 +52,13 @@ class Workflows:
         return self._version
 
     def realtime(self, wf_id, version):
-        """Get name of real-time workflow Docker image.
+        """
+        Get name of real-time workflow Docker image.
 
         :param wf_id: Workflow ID
         :param version: Workflow version
-        :returns: Workflow image or None if not defined
+        :returns: Workflow image or ``None`` if not defined
+
         """
         if (wf_id, version) in self._realtime:
             image = self._realtime[(wf_id, version)]
@@ -62,11 +67,13 @@ class Workflows:
         return image
 
     def batch(self, wf_id, version):
-        """Get name of batch workflow Docker image.
+        """
+        Get name of batch workflow Docker image.
 
         :param wf_id: Workflow ID
         :param version: Workflow version
-        :returns: Workflow image or None if not defined
+        :returns: Workflow image or ``None`` if not defined
+
         """
         if (wf_id, version) in self._batch:
             image = self._batch[(wf_id, version)]
@@ -75,9 +82,11 @@ class Workflows:
         return image
 
     def update_file(self, workflows_file):
-        """Update workflow definitions from file.
+        """
+        Update workflow definitions from file.
 
         :param workflows_file: name of workflow definition file
+
         """
         try:
             with open(workflows_file, 'r') as file:
@@ -89,9 +98,11 @@ class Workflows:
         self._update(workflows_str)
 
     def update_url(self, workflows_url):
-        """Update workflow definitions from URL.
+        """
+        Update workflow definitions from URL.
 
         :param workflows_url: URL of workflow definition file
+
         """
         with requests.get(workflows_url) as req:
             if not req.ok:
@@ -102,9 +113,11 @@ class Workflows:
         self._update(workflows_str)
 
     def _update(self, workflows_str):
-        """Update workflow definitions.
+        """
+        Update workflow definitions.
 
         :param workflows_str: workflow definitions (str)
+
         """
         try:
             workflows = json.loads(workflows_str)
