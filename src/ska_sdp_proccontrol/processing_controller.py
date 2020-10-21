@@ -1,3 +1,6 @@
+"""
+Main processing controller class which contains the event loop.
+"""
 import logging
 import os
 import re
@@ -33,10 +36,17 @@ _RE_DEPLOY_PROC_ANY = re.compile('^proc-(?P<pb_id>{}).*$'.format(_RE_PB))
 
 class ProcessingController:
     """
-    SDP Processing Controller
+    Processing controller.
+
+    :param schema: name of workflow definition schema file
+    :param url: URL from which to fetch workflow definitions
+    :param refresh: workflow definition refresh interval
     """
 
     def __init__(self, schema, url, refresh):
+        """
+        Initialise processing controller.
+        """
         self._workflows = Workflows(schema)
         self._url = url
         self._refresh = refresh
@@ -44,10 +54,12 @@ class ProcessingController:
     @staticmethod
     def _get_pb_status(txn, pb_id: str) -> str:
         """
-        Get status of processing block
+        Get status of processing block.
 
+        :param txn: config DB transaction
         :param pb_id: processing block ID
         :returns: processing block status
+
         """
         state = txn.get_processing_block_state(pb_id)
         if state is None:
@@ -60,7 +72,8 @@ class ProcessingController:
         """
         Start the workflows for new processing blocks.
 
-        :param txn:
+        :param txn: config DB transaction
+
         """
         pb_ids = txn.list_processing_blocks()
         LOG.info("ids {}".format(pb_ids))
@@ -76,8 +89,8 @@ class ProcessingController:
 
         :param txn: config DB transaction
         :param pb_id: processing block ID
-        """
 
+        """
         LOG.info('Making deployment for processing block %s', pb_id)
 
         # Read the processing block
@@ -132,6 +145,7 @@ class ProcessingController:
         Release processing blocks whose dependencies are all finished.
 
         :param txn: config DB transaction
+
         """
         pb_ids = txn.list_processing_blocks()
 
@@ -160,6 +174,7 @@ class ProcessingController:
         Delete processing deployments not associated with a processing block.
 
         :param txn: config DB transaction
+
         """
         pb_ids = txn.list_processing_blocks()
         deploy_ids = txn.list_deployments()
@@ -175,8 +190,10 @@ class ProcessingController:
 
     def main_loop(self, backend=None):
         """
-        Main loop
-        :param backend: config backend to use.
+        Main event loop.
+
+        :param backend: config DB backend to use
+
         """
         # Initialise workflow definitions
         LOG.info('Initialising workflow definitions from %s', self._url)
@@ -215,6 +232,12 @@ def terminate(signal, frame):
 
 
 def main(backend=None):
+    """
+    Start the processing controller.
+
+    :param backend: config DB backend
+
+    """
     configure_logging(level=LOG_LEVEL)
 
     # Register SIGTERM handler
