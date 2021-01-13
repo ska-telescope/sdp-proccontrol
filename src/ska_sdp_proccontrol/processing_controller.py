@@ -224,7 +224,7 @@ class ProcessingController:
 
 def terminate(signal, frame):
     """Terminate the program."""
-    LOG.info("Asked to terminate")
+    LOG.info('Asked to terminate')
     # Note that this will likely send SIGKILL to child processes -
     # not exactly how this is supposed to work. But all of this is
     # temporary anyway.
