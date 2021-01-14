@@ -9,11 +9,14 @@ import workflows_test
 
 LOG = logging.getLogger(__name__)
 
-os.environ['SDP_CONFIG_BACKEND'] = 'memory'
-os.environ['SDP_CONFIG_HOST'] = 'localhost'
-os.environ['SDP_HELM_NAMESPACE'] = 'helm'
+MOCK_ENV_VARS = {
+    'SDP_CONFIG_BACKEND': 'memory',
+    'SDP_CONFIG_HOST': 'localhost',
+    'SDP_HELM_NAMESPACE': 'helm'
+}
 
 
+@patch.dict(os.environ, MOCK_ENV_VARS)
 def test_stuff():
     controller = processing_controller.ProcessingController(workflows_test.SCHEMA,
                                                             workflows_test.WORKFLOWS, 1)
