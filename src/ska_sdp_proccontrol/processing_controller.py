@@ -110,7 +110,7 @@ class ProcessingController:
             LOG.error('Unknown workflow type %s', wf_type)
             wf_image = None
 
-        if wf_image is not None :
+        if wf_image is not None:
             # Make the deployment
             LOG.info('Deploying %s workflow %s, version %s', wf_type, wf_id,
                     wf_version)
