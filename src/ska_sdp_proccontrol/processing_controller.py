@@ -68,20 +68,21 @@ class ProcessingController:
             status = state.get('status')
         return status
 
-    def _start_new_pb_workflows(self, txn):
+    def _start_new_pb_workflows(self, watcher):
         """
         Start the workflows for new processing blocks.
 
         :param txn: config DB transaction
 
         """
-        pb_ids = txn.list_processing_blocks()
-        LOG.info("ids {}".format(pb_ids))
+        for txn in watcher.txn():
+            pb_ids = txn.list_processing_blocks()
+            LOG.info("ids {}".format(pb_ids))
 
-        for pb_id in pb_ids:
-            state = txn.get_processing_block_state(pb_id)
-            if state is None:
-                self._start_workflow(txn, pb_id)
+            for pb_id in pb_ids:
+                state = txn.get_processing_block_state(pb_id)
+                if state is None:
+                    self._start_workflow(txn, pb_id)
 
     def _start_workflow(self, txn, pb_id):
         """
@@ -140,53 +141,55 @@ class ProcessingController:
         # Create the processing block state.
         txn.create_processing_block_state(pb_id, state)
 
-    def _release_pbs_with_finished_dependencies(self, txn):
+    def _release_pbs_with_finished_dependencies(self, watcher):
         """
         Release processing blocks whose dependencies are all finished.
 
         :param txn: config DB transaction
 
         """
-        pb_ids = txn.list_processing_blocks()
+        for txn in watcher.txn():
+            pb_ids = txn.list_processing_blocks()
 
-        for pb_id in pb_ids:
-            state = txn.get_processing_block_state(pb_id)
-            if state is None:
-                status = None
-                ra = None
-            else:
-                status = state.get('status')
-                ra = state.get('resources_available')
-            if status == 'WAITING' and not ra:
-                # Check status of dependencies.
-                pb = txn.get_processing_block(pb_id)
-                dependencies = pb.dependencies
-                dep_ids = [dep['pb_id'] for dep in dependencies]
-                dep_finished = map(lambda x: self._get_pb_status(txn, x) == 'FINISHED', dep_ids)
-                all_finished = all(dep_finished)
-                if all_finished:
-                    LOG.info('Releasing processing block %s', pb_id)
-                    state['resources_available'] = True
-                    txn.update_processing_block_state(pb_id, state)
+            for pb_id in pb_ids:
+                state = txn.get_processing_block_state(pb_id)
+                if state is None:
+                    status = None
+                    ra = None
+                else:
+                    status = state.get('status')
+                    ra = state.get('resources_available')
+                if status == 'WAITING' and not ra:
+                    # Check status of dependencies.
+                    pb = txn.get_processing_block(pb_id)
+                    dependencies = pb.dependencies
+                    dep_ids = [dep['pb_id'] for dep in dependencies]
+                    dep_finished = map(lambda x: self._get_pb_status(txn, x) == 'FINISHED', dep_ids)
+                    all_finished = all(dep_finished)
+                    if all_finished:
+                        LOG.info('Releasing processing block %s', pb_id)
+                        state['resources_available'] = True
+                        txn.update_processing_block_state(pb_id, state)
 
-    def _delete_deployments_without_pb(self, txn):
+    def _delete_deployments_without_pb(self, watcher):
         """
         Delete processing deployments not associated with a processing block.
 
         :param txn: config DB transaction
 
         """
-        pb_ids = txn.list_processing_blocks()
-        deploy_ids = txn.list_deployments()
+        for txn in watcher.txn():
+            pb_ids = txn.list_processing_blocks()
+            deploy_ids = txn.list_deployments()
 
-        for deploy_id in deploy_ids:
-            match = _RE_DEPLOY_PROC_ANY.match(deploy_id)
-            if match is not None:
-                pb_id = match.group('pb_id')
-                if pb_id not in pb_ids:
-                    LOG.info('Deleting deployment %s', deploy_id)
-                    deploy = txn.get_deployment(deploy_id)
-                    txn.delete_deployment(deploy)
+            for deploy_id in deploy_ids:
+                match = _RE_DEPLOY_PROC_ANY.match(deploy_id)
+                if match is not None:
+                    pb_id = match.group('pb_id')
+                    if pb_id not in pb_ids:
+                        LOG.info('Deleting deployment %s', deploy_id)
+                        deploy = txn.get_deployment(deploy_id)
+                        txn.delete_deployment(deploy)
 
     def main_loop(self, backend=None):
         """
@@ -205,7 +208,7 @@ class ProcessingController:
         config = ska_sdp_config.Config(backend=backend)
 
         LOG.info('Starting main loop')
-        for txn in config.txn():
+        for watcher in config.watcher():
 
             # Update workflow definitions if it is time to do so
             if time.time() >= next_workflows_refresh:
@@ -214,12 +217,14 @@ class ProcessingController:
                 next_workflows_refresh = time.time() + self._refresh
 
             # Perform actions.
-            self._start_new_pb_workflows(txn)
-            self._release_pbs_with_finished_dependencies(txn)
-            self._delete_deployments_without_pb(txn)
+            self._start_new_pb_workflows(watcher)
+            self._release_pbs_with_finished_dependencies(watcher)
+            self._delete_deployments_without_pb(watcher)
 
-            LOG.debug('Waiting...')
-            txn.loop(wait=True, timeout=next_workflows_refresh - time.time())
+            # TODO: we don't need this anymore, do we? --> so we don't need the
+            #  stuff about next_workflow_refresh?
+            # LOG.debug('Waiting...')
+            # txn.loop(wait=True, timeout=next_workflows_refresh - time.time())
 
 
 def terminate(signal, frame):
