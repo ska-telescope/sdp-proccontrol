@@ -72,7 +72,7 @@ class ProcessingController:
         """
         Start the workflows for new processing blocks.
 
-        :param txn: config DB transaction
+        :param watcher: config DB watcher object (Config.watcher())
 
         """
         for txn in watcher.txn():
@@ -145,7 +145,7 @@ class ProcessingController:
         """
         Release processing blocks whose dependencies are all finished.
 
-        :param txn: config DB transaction
+        :param watcher: config DB watcher object (Config.watcher())
 
         """
         for txn in watcher.txn():
@@ -175,7 +175,7 @@ class ProcessingController:
         """
         Delete processing deployments not associated with a processing block.
 
-        :param txn: config DB transaction
+        :param watcher: config DB watcher object (Config.watcher())
 
         """
         for txn in watcher.txn():
@@ -193,7 +193,8 @@ class ProcessingController:
 
     def main_loop(self, backend=None):
         """
-        Main event loop.
+        Main event loop, executing three processes on a transaction,
+        performing actions depending on the transaction state.
 
         :param backend: config DB backend to use
 
