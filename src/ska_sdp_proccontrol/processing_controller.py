@@ -79,7 +79,11 @@ class ProcessingController:
             pb_ids = txn.list_processing_blocks()
             LOG.info("ids {}".format(pb_ids))
 
-            for pb_id in pb_ids:
+        for pb_id in pb_ids:
+            for txn in watcher.txn():
+                if txn.get_processing_block(pb_id) is None:
+                    continue
+
                 state = txn.get_processing_block_state(pb_id)
                 if state is None:
                     self._start_workflow(txn, pb_id)
@@ -151,7 +155,11 @@ class ProcessingController:
         for txn in watcher.txn():
             pb_ids = txn.list_processing_blocks()
 
-            for pb_id in pb_ids:
+        for pb_id in pb_ids:
+            for txn in watcher.txn():
+                if txn.get_processing_block(pb_id) is None:
+                    continue
+
                 state = txn.get_processing_block_state(pb_id)
                 if state is None:
                     status = None
@@ -182,11 +190,16 @@ class ProcessingController:
             pb_ids = txn.list_processing_blocks()
             deploy_ids = txn.list_deployments()
 
-            for deploy_id in deploy_ids:
+        for deploy_id in deploy_ids:
+            for txn in watcher.txn():
+                if txn.get_deployment(deploy_id) is None:
+                    continue
+
                 match = _RE_DEPLOY_PROC_ANY.match(deploy_id)
                 if match is not None:
                     pb_id = match.group('pb_id')
-                    if pb_id not in pb_ids:
+                    if (pb_id not in pb_ids) or \
+                            (pb_id in pb_ids and txn.get_processing_block(pb_id) is None):
                         LOG.info('Deleting deployment %s', deploy_id)
                         deploy = txn.get_deployment(deploy_id)
                         txn.delete_deployment(deploy)
