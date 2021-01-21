@@ -110,11 +110,12 @@ def test_proc_control_start_new_pb_workflows(controller_and_config_fixture):
     controller = controller_and_config_fixture[0]
     config = controller_and_config_fixture[1]
 
+    processing_block_ids = [PROCESSING_BLOCK_ID]
     for watcher in config.watcher():
         for txn in config.txn():
             assert controller._get_pb_status(txn, PROCESSING_BLOCK_ID) is None
 
-        controller._start_new_pb_workflows(watcher)
+        controller._start_new_pb_workflows(watcher, processing_block_ids)
 
         for txn in config.txn():
             assert controller._get_pb_status(txn, PROCESSING_BLOCK_ID) == 'STARTING'
@@ -134,9 +135,10 @@ def test_proc_control_release_pbs_with_finished_dependencies(controller_and_conf
     controller = controller_and_config_fixture[0]
     config = controller_and_config_fixture[1]
 
+    processing_block_ids = [PROCESSING_BLOCK_ID]
     for watcher in config.watcher():
         # start a workflow
-        controller._start_new_pb_workflows(watcher)
+        controller._start_new_pb_workflows(watcher, processing_block_ids)
 
         # _release_pbs_with_finished_dependencies works on
         # processing blocks with the following state
@@ -144,7 +146,7 @@ def test_proc_control_release_pbs_with_finished_dependencies(controller_and_conf
         for txn in config.txn():
             txn.update_processing_block_state(PROCESSING_BLOCK_ID, new_state)
 
-        controller._release_pbs_with_finished_dependencies(watcher)
+        controller._release_pbs_with_finished_dependencies(watcher, processing_block_ids)
 
     expected_pb_state = {'resources_available': True, 'status': 'WAITING'}
     for txn in config.txn():
@@ -163,9 +165,10 @@ def test_delete_deployments_without_pb(controller_and_config_fixture):
     controller = controller_and_config_fixture[0]
     config = controller_and_config_fixture[1]
 
+    processing_block_ids = [PROCESSING_BLOCK_ID]
     for watcher in config.watcher():
         # start a workflow
-        controller._start_new_pb_workflows(watcher)
+        controller._start_new_pb_workflows(watcher, processing_block_ids)
 
     # remove the processing block, but leave the deployment
     config.backend.delete('/pb', must_exist=False, recursive=True)
@@ -173,9 +176,11 @@ def test_delete_deployments_without_pb(controller_and_config_fixture):
     for watcher in config.watcher():
         for txn in config.txn():
             assert len(txn.list_deployments()) == 1
+
         # TODO: this doesn't work. MemoryBackend.list_keys fails to
         #  find the deployment even though it's there; problem with "tagging" with "depth"?
-        controller._delete_deployments_without_pb(watcher)
+        controller._delete_deployments_without_pb(watcher, processing_block_ids,
+                                                  ['proc-pb-test-20210118-00000-workflow'])
 
     for txn in config.txn():
         assert len(txn.list_deployments()) == 0
