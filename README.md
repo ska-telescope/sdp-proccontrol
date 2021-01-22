@@ -76,3 +76,11 @@ The behaviour of the PC is summarised as follows:
    deleted from the configuration DB. At present there is no mechanism for
    doing this (other than manually), but it might be used in future to abort
    a workflow execution.
+
+## Implementation
+
+The above explained behaviour of the PC is implemented using the Configuration Library's 
+[Config().watcher()](https://developer.skatelescope.org/projects/ska-sdp-config/en/latest/api.html) 
+method. For more information on watchers take a look at the 
+[Watchers](https://developer.skatelescope.org/projects/ska-sdp-config/en/latest/design.html) 
+section of the Configuration Library documentation.
