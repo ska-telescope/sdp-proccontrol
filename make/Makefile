@@ -86,3 +86,20 @@ help:  ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' ./Makefile | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
 .PHONY: build push pull tag_release push_release tag_latest push_latest rm help
+
+# maintain requirements
+upgrade_pip:  ## make sure pip is up to date.
+	pip install --upgrade pip
+
+requirements: upgrade_pip  ## update and compile requirements
+	pip install -U pip-tools
+	pip-compile -U --output-file requirements-test.txt requirements-test.in
+	pip-compile -U --output-file requirements.txt requirements.in
+
+install_requirements: upgrade_pip
+	pip install -r requirements-test.txt
+	pip install -r requirements.txt
+	pip install -e .
+	pip freeze
+
+update_requirements: requirements install_requirements
