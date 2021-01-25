@@ -212,7 +212,7 @@ class ProcessingController:
         config = ska_sdp_config.Config(backend=backend)
 
         LOG.info('Starting main loop')
-        for watcher in config.watcher(timeout=next_workflows_refresh - time.time()):
+        for watcher in config.watcher(timeout=self._refresh):
             for txn in watcher.txn():
                 pb_ids = txn.list_processing_blocks()
                 deploy_ids = txn.list_deployments()
