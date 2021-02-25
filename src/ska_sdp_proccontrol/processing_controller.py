@@ -68,6 +68,12 @@ class ProcessingController:
             status = state.get('status')
         return status
 
+        "I'm adding some stuff to see what happens when you merge a black-formatted master" \
+        "into an unformatted branch."
+
+        a = "testest"
+        b = a+a
+
     def _start_new_pb_workflows(self, watcher, pb_ids):
         """
         Start the workflows for new processing blocks.
