@@ -65,7 +65,7 @@ class ProcessingController:
         if state is None:
             status = None
         else:
-            status = state.get('status'+'something else')
+            status = state.get('status')
         return status
 
         "I'm adding some stuff to see what happens when you merge a black-formatted master" \
