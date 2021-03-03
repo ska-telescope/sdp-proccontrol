@@ -12,7 +12,7 @@ import workflows_test
 LOG = logging.getLogger(__name__)
 
 MOCK_ENV_VARS = {
-    'SDP_CONFIG_BACKEND': 'memory',
+    "SDP_CONFIG_BACKEND": "memory",
     "SDP_CONFIG_HOST": "localhost",
     "SDP_HELM_NAMESPACE": "helm",
 }
