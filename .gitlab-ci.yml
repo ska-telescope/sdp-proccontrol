@@ -15,6 +15,15 @@ stages:
 
 image: python:latest
 
+# ============================================================================
+# Fail fast if code is not black-formatted
+# ============================================================================
+black:
+  stage: black
+  before_script:
+    - pip3 install black
+  script:
+    - black --check .
 
 # ============================================================================
 # Test and lint Python package
