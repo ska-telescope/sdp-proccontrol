@@ -7,23 +7,11 @@ workflow:
     - if: $CI_COMMIT_BRANCH
 
 stages:
-  - black
   - test
-  - lint
   - build
   - publish
 
 image: python:latest
-
-# ============================================================================
-# Fail fast if code is not black-formatted
-# ============================================================================
-black:
-  stage: black
-  before_script:
-    - pip3 install black
-  script:
-    - black --check .
 
 # ============================================================================
 # Test and lint Python package
@@ -45,14 +33,14 @@ test:
     when: always
 
 lint:
-  stage: lint
-  dependencies:
-    - test
+  stage: test
   before_script:
     - pip3 install -r requirements.txt -r requirements-test.txt
+    - pip3 install black
   script:
     - pylint --exit-zero --output-format=parseable src/ska_sdp_proccontrol
     - pylint --exit-zero --output-format=pylint2junit.JunitReporter src/ska_sdp_proccontrol > linting.xml
+    - black --check . # fails if any of the code doesn't comply to black formatting
   after_script:
     - mkdir -p build/reports
     - mv linting.xml build/reports
