@@ -84,3 +84,13 @@ The above explained behaviour of the PC is implemented using the Configuration L
 method. For more information on watchers take a look at the 
 [Watchers](https://developer.skatelescope.org/projects/ska-sdp-config/en/latest/design.html) 
 section of the Configuration Library documentation.
+
+
+## Contribute to this repository
+
+We use [Black](https://github.com/psf/black) to keep the python code style in good shape. 
+Please make sure you black-formatted your code before merging to master.
+
+The first step in the CI pipeline checks that the code complies with black formatting style,
+and will fail if that is not the case.
+
