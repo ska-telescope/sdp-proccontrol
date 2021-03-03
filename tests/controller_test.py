@@ -14,7 +14,7 @@ LOG = logging.getLogger(__name__)
 MOCK_ENV_VARS = {
     "SDP_CONFIG_BACKEND": "memory",
     "SDP_CONFIG_HOST": "localhost",
-    "SDP_HELM_NAMESPACE": 'helm',
+    "SDP_HELM_NAMESPACE": "helm",
 }
 
 PROCESSING_BLOCK_ID = "pb-test-20210118-00000"
