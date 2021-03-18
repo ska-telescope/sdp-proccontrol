@@ -14,7 +14,7 @@ setuptools.setup(
     version=VERSION,
     description="SDP service responsible for the controlling the execution of processing blocks",
     author="SKA Sim Team",
-    license="License :: OSI Approved :: BSD License",
+    license="BSD License",
     long_description=LONG_DESCRIPTION,
     long_description_content_type="text/markdown",
     url="https://gitlab.com/ska-telescope/sdp/ska-sdp-proccontrol/",
