@@ -17,7 +17,7 @@ setuptools.setup(
     license="License :: OSI Approved :: BSD License",
     long_description=LONG_DESCRIPTION,
     long_description_content_type="text/markdown",
-    url="https://gitlab.com/ska-telescope/sdp-proccontrol/",
+    url="https://gitlab.com/ska-telescope/sdp/sdp-proccontrol/",
     package_dir={"": "src"},
     packages=setuptools.find_packages("src"),
     package_data={"ska_sdp_proccontrol": ["schema/*.json"]},
