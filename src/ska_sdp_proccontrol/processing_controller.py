@@ -117,8 +117,9 @@ class ProcessingController:
             LOG.info("Deploying %s workflow %s, version %s", wf_type, wf_id, wf_version)
             deploy_id = "proc-{}-workflow".format(pb_id)
             values = {}
+            values["env"] = {}
             for v in ["SDP_CONFIG_HOST", "SDP_HELM_NAMESPACE"]:
-                values["env." + v] = os.environ[v]
+                values["env"][v] = os.environ[v]
             values["wf_image"] = wf_image
             values["pb_id"] = pb_id
             chart = {"chart": "workflow", "values": values}
