@@ -1,6 +1,5 @@
 NAME := ska-sdp-proccontrol
-PDIR := ska_sdp_proccontrol
-VERSION := $(patsubst '%',%, $(shell awk -F' = ' '/^VERSION =/{print $$2}' src/$(PDIR)/release.py))
+VERSION := $(shell cat version.txt)
 
 include make/Makefile
 
