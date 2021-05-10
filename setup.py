@@ -7,18 +7,18 @@ import setuptools
 import os
 
 RELEASE_INFO = {}
-RELEASE_PATH = os.path.join('src', 'ska_sdp_proccontrol', 'release.py')
+RELEASE_PATH = os.path.join("src", "ska_sdp_proccontrol", "release.py")
 exec(open(RELEASE_PATH).read(), RELEASE_INFO)
 
 with open("README.md", "r") as fh:
     LONG_DESCRIPTION = fh.read()
 
 setuptools.setup(
-    name=RELEASE_INFO['NAME'],
-    version=RELEASE_INFO['VERSION'],
+    name=RELEASE_INFO["NAME"],
+    version=RELEASE_INFO["VERSION"],
     description="SDP service responsible for the controlling the execution of processing blocks",
-    author=RELEASE_INFO['AUTHOR'],
-    license=RELEASE_INFO['LICENSE'],
+    author=RELEASE_INFO["AUTHOR"],
+    license=RELEASE_INFO["LICENSE"],
     long_description=LONG_DESCRIPTION,
     long_description_content_type="text/markdown",
     url="https://gitlab.com/ska-telescope/sdp/ska-sdp-proccontrol/",
