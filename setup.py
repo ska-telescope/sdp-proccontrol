@@ -1,20 +1,24 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """PIP setup script for the SDP Processing Controller package."""
+# pylint: disable=exec-used
 
 import setuptools
+import os
 
-with open("version.txt", "r") as fh:
-    VERSION = fh.read().rstrip()
+RELEASE_INFO = {}
+RELEASE_PATH = os.path.join('src', 'ska_sdp_proccontrol', 'release.py')
+exec(open(RELEASE_PATH).read(), RELEASE_INFO)
+
 with open("README.md", "r") as fh:
     LONG_DESCRIPTION = fh.read()
 
 setuptools.setup(
-    name="ska-sdp-proccontrol",
-    version=VERSION,
+    name=RELEASE_INFO['NAME'],
+    version=RELEASE_INFO['VERSION'],
     description="SDP service responsible for the controlling the execution of processing blocks",
-    author="SKA Sim Team",
-    license="License :: OSI Approved :: BSD License",
+    author=RELEASE_INFO['AUTHOR'],
+    license=RELEASE_INFO['LICENSE'],
     long_description=LONG_DESCRIPTION,
     long_description_content_type="text/markdown",
     url="https://gitlab.com/ska-telescope/sdp/ska-sdp-proccontrol/",
