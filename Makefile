@@ -3,14 +3,11 @@ VERSION := $(shell cat version.txt)
 
 include make/Makefile
 
-release-patch: ## Patch release
-	bumpver update -n --tag final
+release-patch: ## Patch release; -n --> do not synchronize tags from git
+	bumpver update patch -n
 
-release-minor: ## Minor release
-	bumpver update --minor -n --tag final
+release-minor: ## Minor release; -n --> do not synchronize tags from git
+	bumpver update --minor -n
 
-release-major: ## Major release
-	bumpver update --major -n --tag final
-
-patch-beta: ## Beta patch release
-	bumpver update --patch --tag beta -n
+release-major: ## Major release; -n --> do not synchronize tags from git
+	bumpver update --major -n
