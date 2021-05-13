@@ -4,10 +4,12 @@ from unittest.mock import patch
 
 import pytest
 
+import ska_sdp_config
+
 from ska_sdp_proccontrol import processing_controller
 
-import ska_sdp_config
-import workflows_test
+# Temporary import
+from ska_sdp_proccontrol.workflow import create_workflow
 
 LOG = logging.getLogger(__name__)
 
@@ -18,55 +20,61 @@ MOCK_ENV_VARS = {
 }
 
 PROCESSING_BLOCK_ID = "pb-test-20210118-00000"
+DEPLOYMENT_ID = f"proc-{PROCESSING_BLOCK_ID}-workflow"
+WORKFLOW_TYPE = "batch"
+WORKFLOW_ID = "test_batch"
+WORKFLOW_VERSION = "0.2.1"
+WORKFLOW_IMAGE = "testregistry/workflow-test-batch:0.2.1"
 
 
 @pytest.fixture
 @patch.dict(os.environ, MOCK_ENV_VARS)
-def controller_and_config_fixture():
+def config_and_controller_fixture():
     """
-    Fixture to create processing controller and config objects
-    with a newly added processing block to run the test_batch workflow
+    Fixture to create config and processing controller objects with a workflow
+    definition and processing block in the config DB.
     """
-    controller = processing_controller.ProcessingController(
-        workflows_test.SCHEMA, workflows_test.WORKFLOWS, 1
-    )
+    config = ska_sdp_config.Config()
+    controller = processing_controller.ProcessingController()
 
-    # Annoyingly requests doesn't support local (file) URLs, so redirect. It is possible to
-    # create an adapter for this, but that seems like overkill.
-    controller._workflows.update_url = controller._workflows.update_file
+    # Workflow definition
+    workflow = {"image": WORKFLOW_IMAGE}
 
-    # This is run in controller.main_loop(), but it is needed for other method tests here.
-    controller._workflows.update_url(workflows_test.WORKFLOWS)
-
-    wf = {"type": "batch", "id": "test_batch", "version": "0.2.1"}
+    # Processing block
     pb = ska_sdp_config.ProcessingBlock(
         id=PROCESSING_BLOCK_ID,
         sbi_id="test",
-        workflow=wf,
+        workflow={
+            "type": WORKFLOW_TYPE,
+            "id": WORKFLOW_ID,
+            "version": WORKFLOW_VERSION,
+        },
         parameters={},
         dependencies=[],
     )
 
-    config = ska_sdp_config.Config()
-
-    # Add a new processing block to transactions
     for txn in config.txn():
-        assert controller._get_pb_status(txn, PROCESSING_BLOCK_ID) is None
+        # Temporary function ...
+        create_workflow(txn, WORKFLOW_TYPE, WORKFLOW_ID, WORKFLOW_VERSION, workflow)
+        # ... to be replaced by ...
+        # txn.create_workflow(WORKFLOW_TYPE, WORKFLOW_ID, WORKFLOW_VERSION, workflow)
         txn.create_processing_block(pb)
 
-    return controller, config
+    return config, controller
 
 
 def clear_config(config):
     """
-    Remove all of the processing blocks and deployments from the config db.
+    Remove all of the workflow definitions, processing blocks and deployments
+    from the config DB.
     """
+    config.backend.delete("/workflow", must_exist=False, recursive=True)
     config.backend.delete("/pb", must_exist=False, recursive=True)
     config.backend.delete("/deploy", must_exist=False, recursive=True)
 
 
 @patch.dict(os.environ, MOCK_ENV_VARS)
-def test_controller_main_loop_start_workflow(controller_and_config_fixture):
+def test_controller_main_loop_start_workflow(config_and_controller_fixture):
     """
     Test that the ProcessingController.main_loop starts the
     workflow deployment based on the existing processing blocks in the config db.
@@ -74,8 +82,7 @@ def test_controller_main_loop_start_workflow(controller_and_config_fixture):
     This only tests that the main_loop starts the deployment if
     the processing block doesn't have a state, i.e. no deployments have been started based on it.
     """
-    controller = controller_and_config_fixture[0]
-    config = controller_and_config_fixture[1]
+    config, controller = config_and_controller_fixture
 
     # Perform various actions on the processing block
     # In this case, it will start the workflow deployment
@@ -90,7 +97,10 @@ def test_controller_main_loop_start_workflow(controller_and_config_fixture):
         assert len(deployment_ids) == 1
         # deployment id generated in: ska_sdp_proccontrol.processing_controller.
         # ProcessingController._start_workflow, based on the pb_id
-        assert f"proc-{PROCESSING_BLOCK_ID}-workflow" in deployment_ids
+        assert DEPLOYMENT_ID in deployment_ids
+
+        deployment = txn.get_deployment(DEPLOYMENT_ID)
+        assert deployment.args["values"]["wf_image"] == WORKFLOW_IMAGE
 
     clear_config(config)
 
@@ -103,13 +113,12 @@ def test_main(mock_exit, mock_signal):
 
 
 @patch.dict(os.environ, MOCK_ENV_VARS)
-def test_proc_control_start_new_pb_workflows(controller_and_config_fixture):
+def test_proc_control_start_new_pb_workflows(config_and_controller_fixture):
     """
     ProcessingController._start_new_pb_workflows correctly starts
     a workflow of a newly added processing block.
     """
-    controller = controller_and_config_fixture[0]
-    config = controller_and_config_fixture[1]
+    config, controller = config_and_controller_fixture
 
     processing_block_ids = [PROCESSING_BLOCK_ID]
     for watcher in config.watcher():
@@ -126,7 +135,7 @@ def test_proc_control_start_new_pb_workflows(controller_and_config_fixture):
 
 @patch.dict(os.environ, MOCK_ENV_VARS)
 def test_proc_control_release_pbs_with_finished_dependencies(
-    controller_and_config_fixture,
+    config_and_controller_fixture,
 ):
     """
     ProcessingController._release_pbs_with_finished_dependencies correctly
@@ -135,8 +144,7 @@ def test_proc_control_release_pbs_with_finished_dependencies(
 
     Here the created pb does not have dependencies. (see fixture)
     """
-    controller = controller_and_config_fixture[0]
-    config = controller_and_config_fixture[1]
+    config, controller = config_and_controller_fixture
 
     processing_block_ids = [PROCESSING_BLOCK_ID]
     for watcher in config.watcher():
@@ -162,13 +170,12 @@ def test_proc_control_release_pbs_with_finished_dependencies(
 
 @pytest.mark.skip("See TODO in test.")
 @patch.dict(os.environ, MOCK_ENV_VARS)
-def test_delete_deployments_without_pb(controller_and_config_fixture):
+def test_delete_deployments_without_pb(config_and_controller_fixture):
     """
     ProcessingControl._delete_deployments_without_pb successfully removes
     deployments without a processing block
     """
-    controller = controller_and_config_fixture[0]
-    config = controller_and_config_fixture[1]
+    config, controller = config_and_controller_fixture
 
     processing_block_ids = [PROCESSING_BLOCK_ID]
     for watcher in config.watcher():
@@ -185,7 +192,7 @@ def test_delete_deployments_without_pb(controller_and_config_fixture):
         # TODO: this doesn't work. MemoryBackend.list_keys fails to
         #  find the deployment even though it's there; problem with "tagging" with "depth"?
         controller._delete_deployments_without_pb(
-            watcher, processing_block_ids, ["proc-pb-test-20210118-00000-workflow"]
+            watcher, processing_block_ids, [DEPLOYMENT_ID]
         )
 
     for txn in config.txn():
