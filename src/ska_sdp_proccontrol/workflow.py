@@ -7,7 +7,7 @@ WORKFLOW_PREFIX = "workflow"
 
 
 def workflow_path(type, id, version):
-    return f"/{WORKFLOW_PREFIX}/{type}/{id}/{version}"
+    return f"/{WORKFLOW_PREFIX}/{type}:{id}:{version}"
 
 
 def create_workflow(txn, type, id, version, workflow):
