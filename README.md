@@ -56,22 +56,19 @@ with dependencies start.
 
 The behaviour of the PC is summarised as follows:
 
-1. The PC uses HTTPS to retrieve the workflow definition file. This is a JSON
-   file that specifies the mapping between the workflow ID and version, and a
-   Docker container image. The workflow definition file is updated at regular
-   intervals (the default is every 5 minutes).
+1. If a PB is new, the PC will create the workflow deployment for it. A PB is
+   deemed to be new if the PB state does not exist. The PC reads the workflow
+   definition from the configuration DB to discover which Docker
+   container image to deploy. It creates the state and sets `status` to
+   `STARTING` and `resources_available` to `false`. If the workflow definition
+   is not found in the configuration DB, the PC still creates the state,
+   but sets `status` to `FAILED`.
 
-2. If a PB is new, the PC will create the workflow deployment for it. A PB is
-   deemed to be new if the PB state does not exist. The PC creates the state
-   and sets `status` to `STARTING` and `resources_available` to `false`. If
-   the workflow ID and version is not found in the definition file, the PC
-   still creates the state, but sets `status` to `FAILED`.
-
-3. If a PB's dependencies are all `FINISHED`, the PC sets
+2. If a PB's dependencies are all `FINISHED`, the PC sets
    `resources_available` to `true` to allow it to start executing. Real-time
    PBs do not have dependencies, so they start executing immediately.
 
-4. The PC removes processing deployments (workflows and execution engines) not
+3. The PC removes processing deployments (workflows and execution engines) not
    associated with any existing PB. This is used to clean up if a PB is
    deleted from the configuration DB. At present there is no mechanism for
    doing this (other than manually), but it might be used in future to abort
@@ -79,16 +76,16 @@ The behaviour of the PC is summarised as follows:
 
 ## Implementation
 
-The above explained behaviour of the PC is implemented using the Configuration Library's 
-[Config().watcher()](https://developer.skatelescope.org/projects/ska-sdp-config/en/latest/api.html) 
-method. For more information on watchers take a look at the 
-[Watchers](https://developer.skatelescope.org/projects/ska-sdp-config/en/latest/design.html) 
+The above explained behaviour of the PC is implemented using the Configuration Library's
+[Config().watcher()](https://developer.skatelescope.org/projects/ska-sdp-config/en/latest/api.html)
+method. For more information on watchers take a look at the
+[Watchers](https://developer.skatelescope.org/projects/ska-sdp-config/en/latest/design.html)
 section of the Configuration Library documentation.
 
 
 ## Contribute to this repository
 
-We use [Black](https://github.com/psf/black) to keep the python code style in good shape. 
+We use [Black](https://github.com/psf/black) to keep the python code style in good shape.
 Please make sure you black-formatted your code before merging to master.
 
 The first step in the CI pipeline checks that the code complies with black formatting style,
