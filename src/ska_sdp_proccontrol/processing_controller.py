@@ -6,7 +6,6 @@ import os
 import re
 import signal
 import sys
-import time
 
 import ska_sdp_config
 from ska.logging import configure_logging
@@ -28,6 +27,8 @@ class ProcessingController:
     """
     Processing controller.
     """
+
+    # pylint: disable=invalid-name, too-few-public-methods
 
     def __init__(self):
         pass
@@ -65,7 +66,8 @@ class ProcessingController:
                 if state is None:
                     self._start_workflow(txn, pb_id)
 
-    def _start_workflow(self, txn, pb_id):
+    @staticmethod
+    def _start_workflow(txn, pb_id):
         """
         Start the workflow for a processing block.
 
@@ -137,18 +139,17 @@ class ProcessingController:
                 if status == "WAITING" and not ra:
                     # Check status of dependencies.
                     pb = txn.get_processing_block(pb_id)
-                    dependencies = pb.dependencies
-                    dep_ids = [dep["pb_id"] for dep in dependencies]
-                    dep_finished = map(
-                        lambda x: self._get_pb_status(txn, x) == "FINISHED", dep_ids
+                    dep_finished = all(
+                        self._get_pb_status(txn, dep["pb_id"]) == "FINISHED"
+                        for dep in pb.dependencies
                     )
-                    all_finished = all(dep_finished)
-                    if all_finished:
+                    if dep_finished:
                         LOG.info("Releasing processing block %s", pb_id)
                         state["resources_available"] = True
                         txn.update_processing_block_state(pb_id, state)
 
-    def _delete_deployments_without_pb(self, watcher, pb_ids, deploy_ids):
+    @staticmethod
+    def _delete_deployments_without_pb(watcher, pb_ids, deploy_ids):
         """
         Delete processing deployments not associated with a processing block.
 
@@ -190,7 +191,7 @@ class ProcessingController:
             for txn in watcher.txn():
                 pb_ids = txn.list_processing_blocks()
                 deploy_ids = txn.list_deployments()
-                LOG.info("processing block ids {}".format(pb_ids))
+                LOG.info("processing block ids %s", pb_ids)
 
             # Perform actions.
             self._start_new_pb_workflows(watcher, pb_ids)
@@ -198,7 +199,7 @@ class ProcessingController:
             self._delete_deployments_without_pb(watcher, pb_ids, deploy_ids)
 
 
-def terminate(signal, frame):
+def terminate(_signame, _frame):
     """Terminate the program."""
     LOG.info("Asked to terminate")
     # Note that this will likely send SIGKILL to child processes -
@@ -220,10 +221,10 @@ def main(backend=None):
     signal.signal(signal.SIGTERM, terminate)
 
     # Initialise processing controller
-    pc = ProcessingController()
+    proccontrol = ProcessingController()
 
     # Enter main loop
-    pc.main_loop(backend=backend)
+    proccontrol.main_loop(backend=backend)
 
 
 # Replaced __main__.py with this construct to simplify testing.
