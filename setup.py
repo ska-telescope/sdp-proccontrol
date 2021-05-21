@@ -4,14 +4,16 @@
 
 import setuptools
 
-with open("version.txt", "r") as fh:
-    VERSION = fh.read().rstrip()
+VERSION = {}
+with open("src/ska_sdp_proccontrol/version.py", "r") as fh:
+    exec(fh.read(), VERSION)
+
 with open("README.md", "r") as fh:
     LONG_DESCRIPTION = fh.read()
 
 setuptools.setup(
     name="ska-sdp-proccontrol",
-    version=VERSION,
+    version=VERSION["__version__"],
     description="SDP service responsible for the controlling the execution of processing blocks",
     author="SKA Sim Team",
     license="License :: OSI Approved :: BSD License",
