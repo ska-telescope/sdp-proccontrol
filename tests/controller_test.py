@@ -8,9 +8,6 @@ import ska_sdp_config
 
 from ska_sdp_proccontrol import processing_controller
 
-# Temporary import
-from ska_sdp_proccontrol.workflow import create_workflow
-
 LOG = logging.getLogger(__name__)
 
 MOCK_ENV_VARS = {
@@ -54,10 +51,7 @@ def config_and_controller_fixture():
     )
 
     for txn in config.txn():
-        # Temporary function ...
-        create_workflow(txn, WORKFLOW_TYPE, WORKFLOW_ID, WORKFLOW_VERSION, workflow)
-        # ... to be replaced by ...
-        # txn.create_workflow(WORKFLOW_TYPE, WORKFLOW_ID, WORKFLOW_VERSION, workflow)
+        txn.create_workflow(WORKFLOW_TYPE, WORKFLOW_ID, WORKFLOW_VERSION, workflow)
         txn.create_processing_block(pb)
 
     return config, controller

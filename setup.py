@@ -23,7 +23,7 @@ setuptools.setup(
     package_dir={"": "src"},
     packages=setuptools.find_packages("src"),
     install_requires=[
-        "ska-sdp-config>=0.0.9",
+        "ska-sdp-config>=0.3.0",
         "ska-logging>=0.3",
     ],
     setup_requires=["pytest-runner"],

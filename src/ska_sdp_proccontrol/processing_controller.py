@@ -9,7 +9,6 @@ import sys
 
 import ska_sdp_config
 from ska.logging import configure_logging
-from ska_sdp_proccontrol.workflow import get_workflow
 
 LOG_LEVEL = os.getenv("SDP_LOG_LEVEL", "DEBUG")
 
@@ -86,10 +85,7 @@ class ProcessingController:
         wf_version = pb.workflow["version"]
 
         # Get the container image for the workflow
-        # Use temporary function ...
-        workflow = get_workflow(txn, wf_type, wf_id, wf_version)
-        # ... to be replaced by ...
-        # workflow = txn.get_workflow(wf_type, wf_id, wf_version)
+        workflow = txn.get_workflow(wf_type, wf_id, wf_version)
         if workflow is None:
             wf_image = None
         else:
