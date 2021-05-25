@@ -1,13 +1,6 @@
 API
 ===
 
-Workflows
----------
-
-.. automodule:: ska_sdp_proccontrol.workflows
-   :members:
-   :undoc-members:
-
 Processing controller
 ---------------------
 

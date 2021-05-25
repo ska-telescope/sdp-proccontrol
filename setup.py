@@ -4,14 +4,16 @@
 
 import setuptools
 
-with open("version.txt", "r") as fh:
-    VERSION = fh.read().rstrip()
+VERSION = {}
+with open("src/ska_sdp_proccontrol/version.py", "r") as fh:
+    exec(fh.read(), VERSION)
+
 with open("README.md", "r") as fh:
     LONG_DESCRIPTION = fh.read()
 
 setuptools.setup(
     name="ska-sdp-proccontrol",
-    version=VERSION,
+    version=VERSION["__version__"],
     description="SDP service responsible for the controlling the execution of processing blocks",
     author="SKA Sim Team",
     license="License :: OSI Approved :: BSD License",
@@ -20,15 +22,17 @@ setuptools.setup(
     url="https://gitlab.com/ska-telescope/sdp/ska-sdp-proccontrol/",
     package_dir={"": "src"},
     packages=setuptools.find_packages("src"),
-    package_data={"ska_sdp_proccontrol": ["schema/*.json"]},
     install_requires=[
-        "jsonschema",
-        "requests",
-        "ska-sdp-config>=0.0.9",
+        "ska-sdp-config>=0.3.0",
         "ska-logging>=0.3",
     ],
     setup_requires=["pytest-runner"],
-    tests_require=["pylint2junit", "pytest", "pytest-cov", "pytest-pylint"],
+    tests_require=[
+        "pylint2junit",
+        "pytest",
+        "pytest-cov",
+        "pytest-pylint",
+    ],
     zip_safe=False,
     classifiers=[
         "Development Status :: 3 - Alpha",
