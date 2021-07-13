@@ -83,6 +83,7 @@ class ProcessingController:
         wf_type = pb.workflow["type"]
         wf_id = pb.workflow["id"]
         wf_version = pb.workflow["version"]
+        wf_description = "{} workflow {}, version {}".format(wf_type, wf_id, wf_version)
 
         # Get the container image for the workflow
         workflow = txn.get_workflow(wf_type, wf_id, wf_version)
@@ -93,7 +94,7 @@ class ProcessingController:
 
         if wf_image is not None:
             # Make the deployment
-            LOG.info("Deploying %s workflow %s, version %s", wf_type, wf_id, wf_version)
+            LOG.info("Deploying %s", wf_description)
             deploy_id = "proc-{}-workflow".format(pb_id)
             values = {}
             values["env"] = {}
@@ -108,7 +109,7 @@ class ProcessingController:
             state = {"status": "STARTING", "resources_available": False}
         else:
             # Invalid workflow, so set status to FAILED
-            state = {"status": "FAILED"}
+            state = {"status": "FAILED", "reason": "No image for " + wf_description}
 
         # Create the processing block state.
         txn.create_processing_block_state(pb_id, state)
