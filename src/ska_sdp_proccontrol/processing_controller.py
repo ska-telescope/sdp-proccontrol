@@ -83,7 +83,7 @@ class ProcessingController:
         wf_type = pb.workflow["type"]
         wf_id = pb.workflow["id"]
         wf_version = pb.workflow["version"]
-        wf_description = "{} workflow {}, version {}".format(wf_type, wf_id, wf_version) 
+        wf_description = "{} workflow {}, version {}".format(wf_type, wf_id, wf_version)
 
         # Get the container image for the workflow
         workflow = txn.get_workflow(wf_type, wf_id, wf_version)
@@ -94,7 +94,7 @@ class ProcessingController:
 
         if wf_image is not None:
             # Make the deployment
-            LOG.info("Deploying " + wf_description)
+            LOG.info("Deploying %s", wf_description)
             deploy_id = "proc-{}-workflow".format(pb_id)
             values = {}
             values["env"] = {}
