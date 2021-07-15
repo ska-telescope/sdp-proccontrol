@@ -19,10 +19,8 @@
 #
 
 autodoc_mock_imports = [
-    "jsonschema",
-    "requests",
-    "ska",
     "ska_sdp_config",
+    "ska_ser_logging",
 ]
 
 import os
@@ -41,7 +39,7 @@ def setup(app):
 
 # -- Project information -----------------------------------------------------
 project = "SDP Processing Controller"
-copyright = "2019-2020, SKA SDP Developers"
+copyright = "2019-2021, SKA SDP Developers"
 author = "SKA SDP Developers"
 
 

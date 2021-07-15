@@ -8,7 +8,7 @@ import signal
 import sys
 
 import ska_sdp_config
-from ska.logging import configure_logging
+from ska_ser_logging import configure_logging
 
 LOG_LEVEL = os.getenv("SDP_LOG_LEVEL", "DEBUG")
 

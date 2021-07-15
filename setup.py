@@ -23,15 +23,13 @@ setuptools.setup(
     package_dir={"": "src"},
     packages=setuptools.find_packages("src"),
     install_requires=[
-        "ska-sdp-config>=0.3.0",
-        "ska-logging>=0.3",
+        "ska-sdp-config",
+        "ska-ser-logging",
     ],
     setup_requires=["pytest-runner"],
     tests_require=[
-        "pylint2junit",
         "pytest",
         "pytest-cov",
-        "pytest-pylint",
     ],
     zip_safe=False,
     classifiers=[
